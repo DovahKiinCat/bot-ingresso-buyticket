@@ -13,12 +13,10 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def enviar_telegram(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {
+    requests.post(url, data={
         "chat_id": CHAT_ID,
         "text": msg
-    }
-
-    requests.post(url, data=payload)
+    })
 
 
 async def monitorar():
@@ -27,53 +25,57 @@ async def monitorar():
         page = await browser.new_page()
 
         await page.goto(URL, wait_until="networkidle")
-
         await page.wait_for_timeout(5000)
 
+        # abrir seletor tipo ingresso
+        await page.locator("text=Tipo de ingresso").click()
+        await page.wait_for_timeout(1000)
+
+        # clicar em pista
+        await page.locator("text=Pista").click()
+        await page.wait_for_timeout(2000)
+
+        # abrir seletor categoria
+        await page.locator("text=Categoria").click()
+        await page.wait_for_timeout(1000)
+
+        # clicar em meia estudante
+        await page.locator("text=Meia Estudante").click()
+        await page.wait_for_timeout(3000)
+
+        # pegar preço atualizado
         texto = await page.locator("body").inner_text()
 
-        with open("pagina.txt", "w", encoding="utf-8") as f:
-            f.write(texto)
+        print(texto)
 
-        print(texto[:5000])
+        preco = None
 
-        linhas = texto.split("\n")
+        for linha in texto.split("\n"):
+            if "R$" in linha:
+                try:
+                    valor = (
+                        linha.replace("R$", "")
+                        .replace(".", "")
+                        .replace(",", ".")
+                        .strip()
+                    )
 
-        menor_preco = None
+                    preco = float(valor)
+                    break
+                except:
+                    pass
 
-        for i, linha in enumerate(linhas):
-            linha_lower = linha.lower()
+        if preco is not None:
+            print(f"Preço encontrado: R${preco}")
 
-            if "pista" in linha_lower and "meia" in linha_lower:
-                for j in range(i, min(i + 8, len(linhas))):
-                    if "R$" in linhas[j]:
-                        preco_texto = (
-                            linhas[j]
-                            .replace("R$", "")
-                            .replace(".", "")
-                            .replace(",", ".")
-                            .strip()
-                        )
-
-                        try:
-                            preco = float(preco_texto)
-
-                            if menor_preco is None or preco < menor_preco:
-                                menor_preco = preco
-                        except:
-                            pass
-
-        if menor_preco is not None:
-            print(f"Menor preço encontrado: R${menor_preco}")
-
-            if menor_preco <= PRECO_ALVO:
+            if preco <= PRECO_ALVO:
                 enviar_telegram(
                     f"⚠️ Ingresso Korn encontrado!\n"
-                    f"Pista meia estudante: R${menor_preco}\n"
+                    f"Pista meia estudante: R${preco}\n"
                     f"{URL}"
                 )
         else:
-            print("Nenhum ingresso encontrado.")
+            print("Preço não encontrado.")
 
         await browser.close()
 
