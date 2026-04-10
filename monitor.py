@@ -4,7 +4,7 @@ import requests
 from playwright.async_api import async_playwright
 
 URL = "https://buyticketbrasil.com/evento/kornozfo?data=1778979600000&evento_local=1760655152236x555744260766826500"
-PRECO_ALVO = 400
+PRECO_ALVO = 750
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
