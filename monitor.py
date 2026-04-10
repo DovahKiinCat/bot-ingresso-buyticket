@@ -31,16 +31,13 @@ async def monitorar():
         await page.locator("text=Tipo de ingresso").click()
         await page.wait_for_timeout(1000)
 
-        # clicar em pista
-        await page.locator("text=Pista").click()
+        await page.get_by_text("Pista", exact=True).click()
         await page.wait_for_timeout(2000)
 
-        # abrir seletor categoria
         await page.locator("text=Categoria").click()
         await page.wait_for_timeout(1000)
 
-        # clicar em meia estudante
-        await page.locator("text=Meia Estudante").click()
+        await page.get_by_text("Meia Estudante", exact=True).click()
         await page.wait_for_timeout(3000)
 
         # pegar preço atualizado
