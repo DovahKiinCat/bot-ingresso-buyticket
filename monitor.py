@@ -32,6 +32,11 @@ async def monitorar():
 
         texto = await page.locator("body").inner_text()
 
+        with open("pagina.txt", "w", encoding="utf-8") as f:
+            f.write(texto)
+
+        print(texto[:5000])
+
         linhas = texto.split("\n")
 
         menor_preco = None
